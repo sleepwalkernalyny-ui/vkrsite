@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПРОДИМЕКС - Сезонная работа для водителей</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        /* Кнопка добавления вакансий */
+        .add-vacancy-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1a472a;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .add-vacancy-fab:hover {
+            background: #0d2818;
+            transform: scale(1.05);
+        }
+
+        /* Модальное окно Excel */
+        .excel-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .excel-modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .excel-modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .excel-modal-header h3 {
+            margin: 0;
+            color: #1a472a;
+        }
+
+        .excel-modal-close {
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .excel-modal-close:hover {
+            color: #333;
+        }
+
+        .excel-modal-body {
+            padding: 20px;
+        }
+
+        .excel-file-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            margin: 15px 0;
+            cursor: pointer;
+        }
+
+        .excel-hint {
+            font-size: 12px;
+            color: #666;
+            background: #f5f5f5;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .upload-status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .upload-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .upload-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        #previewTable {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        #previewTable table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        #previewTable th, #previewTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #previewTable th {
+            background: #f5f5f5;
+        }
+
+        .excel-modal-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #1a472a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0d2818;
+        }
+
+        .btn-secondary {
+            background: #ccc;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #bbb;
+        }
+
+        .login-link {
+            transition: opacity 0.3s;
+        }
+
+        .login-link:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header__container">
+            <a href="#" class="logo">
+                <img src="images/logo1.png" alt="Продимекс - работа для водителей" class="logo__image">
+            </a>
+            <nav class="nav">
+                <ul class="nav__list">
+                    <li class="nav__item"><a href="#about" class="nav__link">О нас</a></li>
+                    <li class="nav__item"><a href="#jobs" class="nav__link">Работа</a></li>
+                    <li class="nav__item"><a href="#contacts" class="nav__link">Контакты</a></li>
+                </ul>
+            </nav>
+            <div id="adminControls" style="display: none;">
+                <span id="adminStatus" style="color: #1a472a; margin-right: 15px;"> Админ</span>
+                <button id="logoutBtn" style="background: #1a472a; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer;">Выйти</button>
+            </div>
+            <a id="loginLink" href="admin-login.html" class="login-link" style="background: #1a472a; color: white; padding: 8px 20px; border-radius: 8px; text-decoration: none; margin-left: 20px;">Войти</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container hero__container">
+                <h1 class="hero__title">Сезонная работа для водителей в Воронеже и Воронежской области</h1>
+                <p class="hero__subtitle">
+                    Станьте частью нашей команды в период уборочной страды! ООО УК «Продимекс» приглашает водителей на сезонную работу в наши филиалы. Мы предлагаем стабильный заработок, официальное трудоустройство и работу на современной технике в динамичной команде.
+                </p>
+                <a href="#application" class="button button--primary">Откликнуться на вакансию</a>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <div class="container about__container">
+                <div class="about-image-top">
+                    <img src="images/kar.png" alt="Продимекс - сельскохозяйственная техника">
+                </div>
+                <h2 class="about__title section-title">Работайте с лидером уборочной кампании!</h2>
+                <div class="about__content">
+                    <div class="about__text">
+                        <p class="about__paragraph">
+                            <span class="highlight">ООО УК «Продимекс»</span>
+                             — это управляющая компания с 16-летним опытом организации сельскохозяйственных и логистических работ. Каждый год в период уборки урожая мы расширяем наш штат профессионалами, готовыми к интенсивной и результативной работе.
+                        </p>
+                        
+                        <div class="about__features">
+                            <div class="about__feature">
+                                <h3 class="about__feature-title">Что нас вдохновляет?</h3>
+                                <p class="about__feature-text">
+                                    Мы гордимся своим вкладом в продовольственную безопасность страны. Наша мотивация — четкая организация процесса, благодаря которой каждый этап, от поля до склада, работает как часы.
+                                </p>
+                            </div>
+                            
+                            <div class="about__feature">
+                                <h3 class="about__feature-title">Чем гордится наша команда?</h3>
+                                <p class="about__feature-text">
+                                    Мы ценим ответственность, выносливость и командный дух. Наша гордость — это слаженный коллектив, который ежегодно выполняет важнейшую задачу по сбору и перевозке урожая, и мы приглашаем в него новых надежных коллег.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="about__image">
+                        <img src="images/tex.jpg" alt="Сельскохозяйственная техника в поле" class="about__img">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="jobs" class="jobs">
+            <div class="container">
+                <h2 class="section-title">Актуальные вакансии</h2>
+                <p class="section-subtitle">Выберите вакансию, которая подходит именно вам</p>
+                <div class="jobs-carousel">
+                    <button class="carousel-btn carousel-btn--prev" aria-label="Предыдущие вакансии">
+                        <span>&#10094;</span>
+                    </button>
+                    <div class="carousel-track">
+                        <!-- Вакансии будут загружены через JavaScript -->
+                    </div>
+                    <button class="carousel-btn carousel-btn--next" aria-label="Следующие вакансии">
+                        <span>&#10095;</span>
+                    </button>
+                </div>
+                <div class="carousel-dots"></div>
+            </div>
+        </section>
+
+        <div class="modal" id="vacancyModal">
+            <div class="modal__content">
+                <button class="modal__close">&times;</button>
+                <div class="modal__body"></div>
+            </div>
+        </div>
+
+        <section id="application" class="application-section">
+            <div class="container">
+                <h2 class="section-title">Откликнуться на вакансию</h2>
+                <div class="application-wrapper">
+                    <div class="form-container">
+                        <p class="form-intro">
+                            Хотите присоединиться к нашей сезонной команде?<br>
+                            Заполните форму ниже, и наш руководитель отдела кадров свяжется с вами, чтобы обсудить детали работы в ближайшем к вам филиале.
+                        </p>
+                        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe0nXkZSW32pNM6XQ5VkNsBTDZ4QUwz7cKrz0OO8c17sUbi1Q/viewform?embedded=true" 
+                                width="100%" height="1250" frameborder="0" marginheight="0" marginwidth="0"
+                                style="border: none; border-radius: 10px;">
+                            Загрузка…
+                        </iframe>
+                    </div>
+                </div>
+                <div class="form-note">
+                    <p>После отправки формы наш менеджер свяжется с вами в течение 2 рабочих часов</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contacts" class="contacts-simple">
+            <div class="container">
+                <h2 class="section-title">Контакты</h2>
+                <div class="simple-contact">
+                    <div class="address-block">
+                        <h3>ООО «УК Продимекс Агро»</h3>
+                        <p class="address">📍 394016, г. Воронеж, Московский пр-т, 19Б, офис 417</p>
+                        <p class="phone">📞 +7 (495) 933-44-00</p>
+                        <p class="email">✉️ resume@prodimex.ru</p>
+                    </div>
+                    <div class="map-container">
+                        <h3>Наше местоположение</h3>
+                        <div class="map-iframe">
+                            <iframe src="https://yandex.ru/map-widget/v1/?ll=39.182271%2C51.693555&z=17&pt=39.182271%2C51.693555%2Cpm2orgl&l=map"
+                                    width="100%" height="500" frameborder="0" style="border-radius: 10px; border: none;"
+                                    allowfullscreen="true" title="Офис Продимекс Агро в Воронеже"></iframe>
+                        </div>
+                        <p class="map-note">📍 Московский проспект, 19Б, Воронеж</p>
+                    </div>
+                    <div class="contact-info">
+                        <p><strong>Режим работы:</strong> Пн-Пт: 9:00-18:00, Сб-Вс: выходной</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© ООО "УК Продимекс Агро», Воронеж, 2026</p>
+        </div>
+    </footer>
+
+    <!-- Модальное окно для загрузки Excel -->
+    <div id="excelModal" class="excel-modal">
+        <div class="excel-modal-content">
+            <div class="excel-modal-header">
+                <h3>📊 Добавить вакансии из Excel</h3>
+                <span class="excel-modal-close">&times;</span>
+            </div>
+            <div class="excel-modal-body">
+                <p>Загрузите файл Excel (.xlsx или .xls) с вакансиями.</p>
+                <p class="excel-hint">Файл должен содержать колонки: Название, Описание, Зарплата, График, Требование, Ссылка</p>
+                <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="excel-file-input">
+                <div id="uploadStatus" class="upload-status"></div>
+                <div class="preview-container" id="previewContainer" style="display: none;">
+                    <h4>Предпросмотр:</h4>
+                    <div id="previewTable"></div>
+                </div>
+            </div>
+            <div class="excel-modal-footer">
+                <button id="cancelUploadBtn" class="btn-secondary">Отмена</button>
+                <button id="confirmUploadBtn" class="btn-primary">Добавить вакансии</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка добавления вакансий -->
+    <button id="addVacancyBtn" class="add-vacancy-fab" style="display: none;">➕ Добавить вакансии из Excel</button>
+
+    <script>
+        // ========== КАРУСЕЛЬ (РАБОТАЕТ ДИНАМИЧЕСКИ) ==========
+        let currentIndex = 0;
+        let track, slides, dots, totalSlides;
+
+        function initCarousel() {
+            track = document.querySelector('.carousel-track');
+            slides = document.querySelectorAll('.job-card');
+            const dotsContainer = document.querySelector('.carousel-dots');
+            
+            if (!track || slides.length === 0) return;
+            
+            totalSlides = slides.length;
+            if (totalSlides === 0) return;
+            
+            // Обновляем dots
+            if (dotsContainer) {
+                dotsContainer.innerHTML = '';
+                for (let i = 0; i < totalSlides; i++) {
+                    const dot = document.createElement('span');
+                    dot.classList.add('dot');
+                    if (i === currentIndex) dot.classList.add('active');
+                    dot.addEventListener('click', () => goToSlide(i));
+                    dotsContainer.appendChild(dot);
+                }
+                dots = document.querySelectorAll('.dot');
+            }
+            
+            // Обновляем позицию
+            const slideWidth = slides[0]?.offsetWidth || 0;
+            track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+        }
+
+        function goToSlide(index) {
+            if (!slides.length) return;
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+            currentIndex = index;
+            const slideWidth = slides[0].offsetWidth;
+            track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+            
+            dots?.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentIndex);
+            });
+        }
+
+        function nextSlide() { goToSlide(currentIndex + 1); }
+        function prevSlide() { goToSlide(currentIndex - 1); }
+
+        function attachCarouselEvents() {
+            const prevBtn = document.querySelector('.carousel-btn--prev');
+            const nextBtn = document.querySelector('.carousel-btn--next');
+            if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+            if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+            window.addEventListener('resize', () => goToSlide(currentIndex));
+        }
+
+        // ========== АДМИН-ПАНЕЛЬ ==========
+        function isAdminAuthenticated() { return sessionStorage.getItem('admin_authenticated') === 'true'; }
+        function adminLogout() { sessionStorage.removeItem('admin_authenticated'); location.reload(); }
+        function updateAdminUI() {
+            const loginLink = document.getElementById('loginLink');
+            const adminControls = document.getElementById('adminControls');
+            const addVacancyBtn = document.getElementById('addVacancyBtn');
+            if (isAdminAuthenticated()) {
+                if (loginLink) loginLink.style.display = 'none';
+                if (adminControls) adminControls.style.display = 'inline-flex';
+                if (addVacancyBtn) addVacancyBtn.style.display = 'flex';
+            } else {
+                if (loginLink) loginLink.style.display = 'inline-block';
+                if (adminControls) adminControls.style.display = 'none';
+                if (addVacancyBtn) addVacancyBtn.style.display = 'none';
+            }
+        }
+
+        const VACANCIES_KEY = 'custom_vacancies';
+        const DEFAULT_VACANCIES = [
+            { title: "Водитель трактора", desc: "Работа на токах и полевых станах. Перегрузка и перемещение урожая. Требуется удостоверение тракториста-машиниста.", salary: "от 50 000 руб.", schedule: "5/2", requirement: "Старше 45 лет", url: "tractor.html" },
+            { title: "Водитель магистральной фуры", desc: "Междугородние перевозки урожая. Категория CE, опыт от 3 лет.", salary: "от 80 000 руб.", schedule: "5/2", requirement: "Старше 45 лет", url: "truck.html" },
+            { title: "Водитель КАМАЗа", desc: "Вывоз урожая с полей. Категория С, опыт от 1 года.", salary: "от 60 000 руб.", schedule: "Сменный график", requirement: "Работа в своем регионе", url: "kamaz.html" },
+            { title: "Механизатор", desc: "Обслуживание и ремонт сельхозтехники. Опыт работы на тракторах CASE, John Deere.", salary: "от 150 000 руб.", schedule: "Полная занятость", requirement: "Возможно предоставление жилья", url: "mechanic.html" },
+            { title: "Водитель специального автомобиля", desc: "Управление топливозаправщиками, муковозами.", salary: "от 70 000 руб.", schedule: "6/1", requirement: "Старше 45 лет", url: "special.html" },
+            { title: "Комбайнер на зерноуборочную технику", desc: "Опыт работы в уборке зерновых культур.", salary: "от 80 000 руб.", schedule: "Сезонная работа", requirement: "Стабильный заработок", url: "combine.html" },
+            { title: "Водитель-экспедитор", desc: "Перевозка урожая с сопровождением документов.", salary: "от 70 000 руб.", schedule: "Ответственная работа", requirement: "Старше 45 лет", url: "expeditor.html" }
+        ];
+
+        function getAllVacancies() {
+            const saved = localStorage.getItem(VACANCIES_KEY);
+            return saved ? JSON.parse(saved) : [...DEFAULT_VACANCIES];
+        }
+        function saveVacanciesToStorage(vacancies) { localStorage.setItem(VACANCIES_KEY, JSON.stringify(vacancies)); }
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+
+        function updateJobsCarousel() {
+    const vacancies = getAllVacancies();
+    const carouselTrack = document.querySelector('.carousel-track');
+    if (!carouselTrack) return;
+    
+    const isAdmin = isAdminAuthenticated(); // Проверяем, авторизован ли админ
+    
+    carouselTrack.innerHTML = vacancies.map((vacancy, idx) => `
+        <div class="job-card">
+            <div class="job-card__content">
+                <h3 class="job-card__title">${escapeHtml(vacancy.title)}</h3>
+                <p class="job-card__desc">${escapeHtml(vacancy.desc)}</p>
+                <ul class="job-card__features">
+                    <li>• Зарплата: ${escapeHtml(vacancy.salary)}</li>
+                    <li>• Режим работы: ${escapeHtml(vacancy.schedule)}</li>
+                    <li>• ${escapeHtml(vacancy.requirement)}</li>
+                </ul>
+            </div>
+            <div class="job-card__footer">
+                <a href="${escapeHtml(vacancy.url)}" class="job-card__btn">Подробнее</a>
+                ${isAdmin ? `<button class="job-card__delete-btn" data-index="${idx}" title="Удалить вакансию">🗑️ Удалить</button>` : ''}
+            </div>
+        </div>
+    `).join('');
+    
+    // Добавляем обработчики для кнопок удаления (только если админ)
+    if (isAdmin) {
+        document.querySelectorAll('.job-card__delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const index = parseInt(btn.getAttribute('data-index'));
+                if (confirm('Вы уверены, что хотите удалить эту вакансию?')) {
+                    deleteVacancy(index);
+                }
+            });
+        });
+    }
+    
+    // Переинициализируем карусель
+    currentIndex = 0;
+    initCarousel();
+}
+        // Удаление вакансии по индексу
+function deleteVacancy(index) {
+    if (!isAdminAuthenticated()) {
+        alert('Доступ запрещён. Только для администратора.');
+        return;
+    }
+    
+    const vacancies = getAllVacancies();
+    if (index >= 0 && index < vacancies.length) {
+        const deletedTitle = vacancies[index].title;
+        vacancies.splice(index, 1);
+        saveVacanciesToStorage(vacancies);
+        updateJobsCarousel(); // Перерисовываем карусель
+        alert(`✅ Вакансия "${deletedTitle}" удалена!`);
+    }
+}
+
+        function parseExcelFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
+                if (rows.length < 2) reject(new Error('Файл должен содержать заголовки и хотя бы одну строку с данными'));
+                
+                const headers = rows[0];
+                const requiredHeaders = ['Название', 'Описание', 'Зарплата', 'График', 'Требование'];
+                
+                // Проверяем обязательные колонки (Ссылка теперь не обязательна, мы её создадим сами)
+                for (let req of requiredHeaders) {
+                    if (!headers.includes(req)) {
+                        reject(new Error(`В файле отсутствует колонка "${req}"`));
+                        return;
+                    }
+                }
+                
+                const idx = {
+                    title: headers.indexOf('Название'),
+                    desc: headers.indexOf('Описание'),
+                    salary: headers.indexOf('Зарплата'),
+                    schedule: headers.indexOf('График'),
+                    requirement: headers.indexOf('Требование'),
+                    url: headers.indexOf('Ссылка') // может быть -1, если колонки нет
+                };
+                
+                const vacancies = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || row.length === 0) continue;
+                    
+                    const title = row[idx.title];
+                    if (!title) continue;
+                    
+                    const description = String(row[idx.desc] || '');
+                    const salary = String(row[idx.salary] || '');
+                    const schedule = String(row[idx.schedule] || '');
+                    const requirement = String(row[idx.requirement] || '');
+                    
+                    // 🔥 АВТОМАТИЧЕСКИ ФОРМИРУЕМ ССЫЛКУ НА ШАБЛОН 🔥
+                    const templateUrl = `vacancy-template.html?title=${encodeURIComponent(title)}&salary=${encodeURIComponent(salary)}&desc=${encodeURIComponent(description)}&schedule=${encodeURIComponent(schedule)}&requirement=${encodeURIComponent(requirement)}`;
+                    
+                    vacancies.push({
+                        title: title,
+                        desc: description,
+                        salary: salary,
+                        schedule: schedule,
+                        requirement: requirement,
+                        url: templateUrl  // ← теперь ссылка создаётся автоматически!
+                    });
+                }
+                
+                if (vacancies.length === 0) {
+                    reject(new Error('Не найдено вакансий для добавления'));
+                    return;
+                }
+                
+                resolve(vacancies);
+            } catch (error) {
+                reject(new Error('Ошибка при чтении файла: ' + error.message));
+            }
+        };
+        reader.onerror = () => reject(new Error('Не удалось прочитать файл'));
+        reader.readAsArrayBuffer(file);
+    });
+}
+        function addVacancies(newVacancies) {
+            const allVacancies = [...getAllVacancies(), ...newVacancies];
+            saveVacanciesToStorage(allVacancies);
+            updateJobsCarousel();
+            return allVacancies.length;
+        }
+
+        if (sessionStorage.getItem('scrollTo') === 'application') {
+            sessionStorage.removeItem('scrollTo');
+            setTimeout(() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAdminUI();
+            updateJobsCarousel();
+            attachCarouselEvents();
+
+            document.getElementById('logoutBtn')?.addEventListener('click', adminLogout);
+
+            const addBtn = document.getElementById('addVacancyBtn');
+            const modal = document.getElementById('excelModal');
+            const closeModal = document.querySelector('.excel-modal-close');
+            const cancelBtn = document.getElementById('cancelUploadBtn');
+            const confirmBtn = document.getElementById('confirmUploadBtn');
+            const fileInput = document.getElementById('excelFileInput');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewTable = document.getElementById('previewTable');
+            const uploadStatus = document.getElementById('uploadStatus');
+            let currentVacanciesToAdd = [];
+
+            if (addBtn) addBtn.onclick = () => { modal.style.display = 'flex'; fileInput.value = ''; previewContainer.style.display = 'none'; uploadStatus.innerHTML = ''; currentVacanciesToAdd = []; };
+            if (closeModal) closeModal.onclick = () => modal.style.display = 'none';
+            if (cancelBtn) cancelBtn.onclick = () => modal.style.display = 'none';
+            window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+            if (fileInput) fileInput.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                uploadStatus.innerHTML = '<div class="upload-status">⏳ Чтение файла...</div>';
+                previewContainer.style.display = 'none';
+                try {
+                    const vacancies = await parseExcelFile(file);
+                    currentVacanciesToAdd = vacancies;
+                    let html = '<table><thead><tr><th>Название</th><th>Описание</th><th>Зарплата</th><th>График</th><th>Требование</th></tr></thead><tbody>';
+                    vacancies.forEach(v => { let d = v.desc.substring(0, 50) + (v.desc.length > 50 ? '...' : ''); html += `<tr><td>${escapeHtml(v.title)}</td><td>${escapeHtml(d)}</td><td>${escapeHtml(v.salary)}</td><td>${escapeHtml(v.schedule)}</td><td>${escapeHtml(v.requirement)}</td></tr>`; });
+                    html += '</tbody></table>';
+                    previewTable.innerHTML = html;
+                    previewContainer.style.display = 'block';
+                    uploadStatus.innerHTML = `<div class="upload-status success">✅ Найдено вакансий: ${vacancies.length}</div>`;
+                } catch (error) { uploadStatus.innerHTML = `<div class="upload-status error">❌ ${error.message}</div>`; currentVacanciesToAdd = []; }
+            };
+            if (confirmBtn) confirmBtn.onclick = () => {
+                if (currentVacanciesToAdd.length === 0) { alert('Сначала загрузите Excel-файл'); return; }
+                const count = addVacancies(currentVacanciesToAdd);
+                alert(`✅ Добавлено ${currentVacanciesToAdd.length} вакансий! Всего вакансий: ${count}`);
+                modal.style.display = 'none';
+                currentVacanciesToAdd = [];
+                fileInput.value = '';
+                previewContainer.style.display = 'none';
+            };
+        });
+    </script>
+</body>
+</html>

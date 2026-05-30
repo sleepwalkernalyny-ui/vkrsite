@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход для администратора - Продимекс</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
+            padding: 20px;
+        }
+        .admin-login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .admin-login-card h2 {
+            text-align: center;
+            color: #1a472a;
+            margin-bottom: 10px;
+        }
+        .admin-login-card .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #1a472a;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #1a472a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-btn:hover {
+            background: #0d2818;
+        }
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #1a472a;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login-container">
+        <div class="admin-login-card">
+            <h2>🔐 Административная панель</h2>
+            <p class="subtitle">Вход для управления вакансиями</p>
+            
+            <div class="error-message" id="errorMessage">
+                Неверный логин или пароль
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" id="login" placeholder="admin" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="password" placeholder="••••••">
+                </div>
+                <button type="submit" class="login-btn">Войти</button>
+            </form>
+            
+            <a href="index.html.html" class="back-link">← Вернуться на сайт</a>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const login = document.getElementById('login').value;
+            const password = document.getElementById('password').value;
+            
+            if (login === 'admin' && password === '1973') {
+                // Сохраняем авторизацию
+                sessionStorage.setItem('admin_authenticated', 'true');
+                // Возвращаемся на главную
+                window.location.href = 'index.html.html';
+            } else {
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

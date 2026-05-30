@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вакансия - Продимекс</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="images/favicon.png">
+    <style>
+        .vacancy-detail {
+            padding: 40px 0;
+            min-height: 60vh;
+        }
+        .vacancy-header {
+            margin-bottom: 30px;
+        }
+        .vacancy-title {
+            font-size: 36px;
+            color: #1a472a;
+            margin-bottom: 10px;
+        }
+        .vacancy-salary {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff8c00;
+        }
+        .vacancy-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .button--primary {
+            background: #1a472a;
+            color: white;
+        }
+        .button--primary:hover {
+            background: #0d2818;
+            transform: translateY(-2px);
+        }
+        .button--secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .button--secondary:hover {
+            background: #5a6268;
+        }
+        .vacancy-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+        .vacancy-section {
+            margin-bottom: 30px;
+        }
+        .vacancy-section h2 {
+            color: #1a472a;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        .vacancy-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .vacancy-section ul li {
+            padding-left: 20px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        .vacancy-section ul li::before {
+            content: "•";
+            color: #1a472a;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        .vacancy-info-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            position: sticky;
+            top: 20px;
+        }
+        .vacancy-info-card h3 {
+            color: #1a472a;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .vacancy-info-card ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 20px;
+        }
+        .vacancy-info-card ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        @media (max-width: 768px) {
+            .vacancy-content {
+                grid-template-columns: 1fr;
+            }
+            .vacancy-title { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header__container">
+            <a href="index.html.html" class="logo">
+                <img src="images/logo1.png" alt="Продимекс" class="logo__image">
+            </a>
+            <nav class="nav">
+                <ul class="nav__list">
+                    <li class="nav__item"><a href="index.html.html" class="nav__link">О нас</a></li>
+                    <li class="nav__item"><a href="index.html.html" class="nav__link">Работа</a></li>
+                    <li class="nav__item"><a href="index.html.html" class="nav__link">Контакты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="vacancy-detail">
+        <div class="container">
+            <div class="vacancy-header">
+                <h1 class="vacancy-title" id="vacancyTitle">Загрузка...</h1>
+                <div class="vacancy-salary" id="vacancySalary"></div>
+            </div>
+            
+            <div class="vacancy-buttons">
+                <a href="index.html.html" class="button button--secondary">← Назад к вакансиям</a>
+                <a href="index.html.html" class="button button--primary" onclick="sessionStorage.setItem('scrollTo', 'application'); return true;">📝 Заполнить анкету</a>
+                <a href="index.html.html#jobs" class="button button--next" id="nextVacancyBtn" style="background: #1a472a; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none;">Следующая вакансия →</a>
+            </div>
+            
+            <div class="vacancy-content">
+                <div class="vacancy-main">
+                    <section class="vacancy-section">
+                        <h2>Описание вакансии</h2>
+                        <p id="vacancyDesc">Загрузка описания...</p>
+                    </section>
+                    
+                    <section class="vacancy-section">
+                        <h2>Обязанности</h2>
+                        <ul id="vacancyDuties">
+                            <li>Выполнение работ согласно должностной инструкции</li>
+                            <li>Соблюдение техники безопасности</li>
+                            <li>Поддержание рабочего места в порядке</li>
+                        </ul>
+                    </section>
+                    
+                    <section class="vacancy-section">
+                        <h2>Требования</h2>
+                        <ul id="vacancyRequirements">
+                            <li>Ответственность и пунктуальность</li>
+                            <li>Желание работать и развиваться</li>
+                        </ul>
+                    </section>
+                </div>
+                
+                <div class="vacancy-sidebar">
+                    <div class="vacancy-info-card">
+                        <h3>Условия работы</h3>
+                        <ul id="vacancyConditions">
+                            <li><strong>Зарплата:</strong> по договорённости</li>
+                            <li><strong>График:</strong> по договорённости</li>
+                            <li><strong>Тип занятости:</strong> полная</li>
+                        </ul>
+                        
+                        <h3>Мы предлагаем</h3>
+                        <ul>
+                            <li>Официальное трудоустройство по ТК РФ</li>
+                            <li>Социальные гарантии</li>
+                            <li>Работа в стабильной компании</li>
+                            <li>Своевременная выплата заработной платы</li>
+                            <li>Дружный коллектив</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© ООО "УК Продимекс Агро», Воронеж, 2026</p>
+        </div>
+    </footer>
+    
+    <script src="script.js"></script>
+    <script>
+        // Получаем параметры из URL
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                title: params.get('title') || 'Вакансия',
+                salary: params.get('salary') || 'По договорённости',
+                desc: params.get('desc') || 'Полное описание вакансии будет предоставлено при собеседовании.',
+                schedule: params.get('schedule') || 'По договорённости',
+                requirement: params.get('requirement') || 'Рассмотрим кандидатов с любым опытом',
+                duties: params.get('duties') || null,
+                requirements: params.get('requirements') || null
+            };
+        }
+
+        // Заполняем страницу данными
+        function loadVacancyData() {
+            const params = getQueryParams();
+            
+            // Заголовок страницы и title
+            document.title = `${params.title} - Продимекс`;
+            document.getElementById('vacancyTitle').textContent = params.title;
+            document.getElementById('vacancySalary').textContent = params.salary;
+            document.getElementById('vacancyDesc').textContent = params.desc;
+            
+            // Обновляем условия работы в боковой панели
+            const conditionsList = document.getElementById('vacancyConditions');
+            conditionsList.innerHTML = `
+                <li><strong>Зарплата:</strong> ${params.salary}</li>
+                <li><strong>График:</strong> ${params.schedule}</li>
+                <li><strong>Требование:</strong> ${params.requirement}</li>
+                <li><strong>Тип занятости:</strong> полная</li>
+            `;
+            
+            // Если переданы дополнительные обязанности через параметр duties (разделитель |)
+            if (params.duties) {
+                const dutiesList = document.getElementById('vacancyDuties');
+                const dutiesArray = params.duties.split('|');
+                dutiesList.innerHTML = dutiesArray.map(d => `<li>${d.trim()}</li>`).join('');
+            }
+            
+            // Если переданы дополнительные требования
+            if (params.requirements) {
+                const reqList = document.getElementById('vacancyRequirements');
+                const reqArray = params.requirements.split('|');
+                reqList.innerHTML = reqArray.map(r => `<li>${r.trim()}</li>`).join('');
+            }
+        }
+
+        // Получаем все вакансии для кнопки "Следующая вакансия"
+        function setupNextButton() {
+            const vacancies = getAllVacancies ? getAllVacancies() : [];
+            const currentTitle = document.getElementById('vacancyTitle')?.textContent || '';
+            
+            // Находим индекс текущей вакансии
+            const currentIndex = vacancies.findIndex(v => v.title === currentTitle);
+            
+            // Если есть следующая вакансия
+            if (currentIndex !== -1 && currentIndex + 1 < vacancies.length) {
+                const nextVacancy = vacancies[currentIndex + 1];
+                const nextBtn = document.getElementById('nextVacancyBtn');
+                if (nextBtn) {
+                    // Формируем URL для следующей вакансии с использованием шаблона
+                    const nextUrl = `vacancy-template.html?title=${encodeURIComponent(nextVacancy.title)}&salary=${encodeURIComponent(nextVacancy.salary)}&desc=${encodeURIComponent(nextVacancy.desc)}&schedule=${encodeURIComponent(nextVacancy.schedule)}&requirement=${encodeURIComponent(nextVacancy.requirement)}`;
+                    nextBtn.href = nextUrl;
+                    nextBtn.style.display = 'inline-block';
+                }
+            } else {
+                const nextBtn = document.getElementById('nextVacancyBtn');
+                if (nextBtn) nextBtn.style.display = 'none';
+            }
+        }
+
+        // Загружаем данные
+        loadVacancyData();
+        
+        // Настраиваем кнопку "Следующая вакансия" после загрузки страницы
+        setTimeout(setupNextButton, 100);
+    </script>
+    <script>
+        // Функция для получения всех вакансий (дублируем из index.html на всякий случай)
+        function getAllVacancies() {
+            const VACANCIES_KEY = 'custom_vacancies';
+            const DEFAULT_VACANCIES = [
+                { title: "Водитель трактора", desc: "Работа на токах и полевых станах. Перегрузка и перемещение урожая.", salary: "от 50 000 руб.", schedule: "5/2", requirement: "Старше 45 лет", url: "tractor.html" },
+                { title: "Водитель магистральной фуры", desc: "Междугородние перевозки урожая. Категория CE, опыт от 3 лет.", salary: "от 80 000 руб.", schedule: "5/2", requirement: "Старше 45 лет", url: "truck.html" },
+                { title: "Водитель КАМАЗа", desc: "Вывоз урожая с полей. Категория С, опыт от 1 года.", salary: "от 60 000 руб.", schedule: "Сменный график", requirement: "Работа в своем регионе", url: "kamaz.html" },
+                { title: "Механизатор", desc: "Обслуживание и ремонт сельхозтехники.", salary: "от 150 000 руб.", schedule: "Полная занятость", requirement: "Возможно предоставление жилья", url: "mechanic.html" },
+                { title: "Водитель специального автомобиля", desc: "Управление топливозаправщиками, муковозами.", salary: "от 70 000 руб.", schedule: "6/1", requirement: "Старше 45 лет", url: "special.html" },
+                { title: "Комбайнер на зерноуборочную технику", desc: "Опыт работы в уборке зерновых культур.", salary: "от 80 000 руб.", schedule: "Сезонная работа", requirement: "Стабильный заработок", url: "combine.html" },
+                { title: "Водитель-экспедитор", desc: "Перевозка урожая с сопровождением документов.", salary: "от 70 000 руб.", schedule: "Ответственная работа", requirement: "Старше 45 лет", url: "expeditor.html" }
+            ];
+            const saved = localStorage.getItem(VACANCIES_KEY);
+            return saved ? JSON.parse(saved) : DEFAULT_VACANCIES;
+        }
+    </script>
+</body>
+</html>
